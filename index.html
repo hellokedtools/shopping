@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shopping Street Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b2540;--pink:#ff6fae;--org:#ff9f1c;--yel:#ffd23f;--grn:#3ddc97;--sky:#4cc9f0;--pur:#9b5de5;--mute:#a89ecb/*#6d6685*/;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:linear-gradient(160deg,#e3f6ff 0%,#fff1fa 55%,#fff9d9 100%);color:var(--ink);font:600 16px/1.4 Nunito,system-ui,sans-serif}
+.wrap{max-width:800px;margin:0 auto;padding:14px 14px 40px}
+h1{font-family:"Baloo 2",system-ui,sans-serif;margin:0;font-size:30px;line-height:1.1}
+.card{background:#fff;border:3px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 var(--pur);padding:12px 14px;margin:12px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{display:inline-block;border:3px solid var(--ink);border-radius:99px;padding:2px 12px;font-weight:800;background:#fff}
+.chip.big{font-family:"Baloo 2",sans-serif;font-size:20px;padding:0 14px}
+.szS{background:var(--sky)}.szM{background:var(--org)}.szL{background:var(--pink)}
+button,input{font:inherit;color:var(--ink)}
+button{cursor:pointer;border:3px solid var(--ink);border-radius:14px;padding:8px 14px;font-weight:800;box-shadow:3px 3px 0 var(--ink);background:#fff}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--pur);outline-offset:2px}
+input{width:100%;border:3px solid var(--ink);border-radius:12px;padding:8px 10px;background:#fff}
+label{display:block;margin:10px 0 4px;font-weight:800}
+.mission{background:#fff;border:3px dashed var(--pur);border-radius:14px;padding:8px 12px;margin:12px 0}
+.line{border:3px solid var(--ink);border-radius:16px;padding:8px 12px;margin:9px 0;max-width:92%;background:#fff}
+.line small{display:block;font-weight:800;color:var(--mute)}
+.line b{border-bottom:3px solid var(--pink)}
+.line.c{margin-right:auto;background:#ffe4f1}.line.s{margin-left:auto;background:#def4ff}
+.line.next{opacity:.45;border-style:dashed}
+.line.done{opacity:.85}.line.done small::after{content:"  ✔";color:#18a86b}
+.line.now.c{box-shadow:5px 5px 0 var(--pink)}.line.now.s{box-shadow:5px 5px 0 var(--sky)}
+.line.now{font-size:22px;padding:12px 14px}small{font-size:14px;}.line small{margin-bottom:10px;}
+@media (prefers-reduced-motion:no-preference){.line.now{animation:pop .35s ease-out}@keyframes pop{from{transform:scale(.96)}to{transform:none}}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pick{padding:14px 6px;font-size:18px}
+.go{background:var(--grn);margin-top:10px;font-size:17px;width:100%}
+.price{font-family:"Baloo 2",sans-serif;font-size:44px;line-height:1;text-align:center;background:var(--yel);border:3px solid var(--ink);border-radius:14px;margin-top:10px;padding:6px}
+.tip{margin-top:15px;font-weight:800}
+.pick.sel{outline:4px solid var(--ink);outline-offset:2px;transform:scale(1.04)}.pick.sel::after{content:" ✔"}
+.go:disabled{background:#e6e3ee;color:var(--mute);box-shadow:none;cursor:not-allowed}
+.bk{background:none;border:0;box-shadow:none;border-radius:8px;padding:2px 4px;margin-top:8px;font-size:13px;font-weight:600;color:var(--mute);text-decoration:underline}
+.bk:active{transform:none;box-shadow:none}
+.msg{font-weight:800;color:#d6336c;margin:8px 0 0}
+.foot{margin-top:18px;text-align:center}.foot button{font-size:14px;padding:5px 12px;background:#fff}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const IT=[["T-shirt","👕","#ffc2dd"],["sweater","🧶","#ffd9a8"],["handkerchief","🧣","#bfeaff"],["pants","👖","#c9f2b8"]];
+const SZ=["S","M","L"],SUG=["black","brown"],ASK=["blue","green","red","yellow"];
+const HEX={blue:"#2f80ed",green:"#27ae60",red:"#eb4d4b",yellow:"#ffd23f",black:"#222",brown:"#8d5524"};
+const SZC={S:"var(--sky)",M:"var(--org)",L:"var(--pink)"};
+const makeShop=()=>({size:SZ[Math.floor(Math.random()*3)],prices:IT.map(()=>5+Math.floor(Math.random()*35))});
+let SH=makeShop(),S={step:0,sel:{},sales:[]};
+try{const d=JSON.parse(localStorage.getItem("ss3")||"null");if(d&&d.shop){SH=d.shop;S.sales=d.sales||[]}}catch(e){}
+function save(){try{localStorage.setItem("ss3",JSON.stringify({shop:SH,sales:S.sales}))}catch(e){}}
+const $=id=>document.getElementById(id);
+const shop=()=>SH;
+const pk=(a,arr,cur)=>`<div class="grid">${arr.map(x=>`<button class="pick${String(x[0])===String(cur)?" sel":""}" aria-pressed="${String(x[0])===String(cur)}" style="background:${x[2]};color:${x[3]||"var(--ink)"}" data-a="${a}" data-v="${x[0]}">${x[1]}</button>`).join("")}</div>`;
+const NEXT='<button class="go" data-a="next">Next ▶</button>',AGAIN='<button class="go" data-a="again">Next customer ▶</button>',NEXTX='<button class="go" data-a="next" disabled>Next ▶</button>',BACK='<div><button class="bk" data-a="back">← back</button></div>';
+function ctl(i,ok){
+  if(i===0)return `<div class="tip"><!--Say it, then tap Next.--></div>`+NEXT;
+  if(i===1)return `<div class="tip"><!--Listen. What does the customer want?--></div>`+pk("item",IT.map((x,k)=>[k,x[1]+" "+x[0],x[2]]),S.sel.item)+(S.sel.item!=null?NEXT:NEXTX);
+  if(i===2)return `<div class="tip"><!--Read it aloud, then tap Next.--></div>`+NEXT;
+  if(i===3)return `<div class="tip"><!--Listen. Which color does the customer ask for?--></div>`+pk("color",ASK.map(c=>[c,c,HEX[c],c==="yellow"?"var(--ink)":"#fff"]),S.sel.color)+(S.sel.color?NEXT:NEXTX);
+  if(i===5)return `<div class="tip"><!--Listen. Which size does the customer ask for?--></div>`+pk("size",SZ.map(s=>[s,s,SZC[s]]),S.sel.size)+(S.sel.size?NEXT:NEXTX);
+  if(i===6)return ok?NEXT:AGAIN;
+  if(i===9)return `<button class="go" data-a="paid">💰 I got the money</button>`;
+  if(i===10)return AGAIN;
+  return NEXT;
+}
+function main(){
+  const sh=shop(),s=S.sel,ok=s.size==null||s.size===sh.size,tot=S.sales.reduce((a,x)=>a+x.p,0);
+  const pr=s.item!=null?sh.prices[s.item]:"…";
+  const L=[["c","Can I help you?"],
+  ["s",`Yes, please. I want a ( <b>${s.item!=null?IT[s.item][0]:"___"}</b> ) for ( <b>…</b> ).`],
+  ["c",`Well, how about this ( <b>${s.sug||"___"}</b> ) one?`],
+  ["s",`Nice! But do you have the same one in ( <b>${s.color||"___"}</b> )?`],
+  ["c","Yes, we do. Here it is."],
+  ["s",`Do you have it in size ( <b>${s.size||"_"}</b> )?`],
+  ["c",s.size==null?"Yes, we do. Here it is. / Sorry, we don’t.":ok?"Yes, we do. Here it is.":"Sorry, we don’t."],
+  ["s","Thank you. How much is it?"],
+  ["c",`It’s ( <b>${pr}</b> ) dollars, please.`],
+  ["s","OK, here you are."],["c","Thank you."]];
+  let h=`<div class="top"><h1>🏪 My Shop</h1><button class="chip big sz${sh.size}" data-a="cycle" title="Tap to change size" disabled>Size ${sh.size} shop ⟳</button></div>
+  <div style="margin-top:8px"><span class="chip" style="background:var(--grn)">Sales ${S.sales.length}</span> <span class="chip" style="background:var(--yel)">Money $${tot}</span></div>
+  <div class="mission"><b>Clerk mission:</b> serve every customer. You sell all items and colors, but only in size ${sh.size}. Follow the lines and tap what you hear. <small>(すべてのお客様に接客すること。商品は全種類・全色を取り扱っていますが、サイズは「${sh.size}」のみです。線に沿って進み、聞こえてきたものをタップしてください。)</small></div>`;
+  h+=L.map((l,i)=>{
+    const st=i<S.step?"done":i===S.step?"now":"next";
+    return `<div class="line ${l[0]} ${st}"><small>${l[0]==="c"?"You say":"Customer says"}</small>${l[1]}${i===S.step?(i===8?`<div class="price">$${pr}</div>`:"")+ctl(i,ok)+(i>0?BACK:""):""}</div>`}).join("");
+  return h+`<div class="foot"><button data-a="change">New shop (new size and prices)</button></div>`;
+}
+let seen=-1;function R(){$("app").innerHTML=main();const e=document.querySelector(".line.now");if(e&&S.step>0&&S.step!==seen)e.scrollIntoView({block:"center"});seen=S.step}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+  if(a==="next"){const s=S.sel;if((S.step===1&&s.item==null)||(S.step===3&&!s.color)||(S.step===5&&!s.size))return;S.step++;if(S.step===2&&!s.sug)s.sug=SUG[Math.floor(Math.random()*2)]}
+  else if(a==="item")S.sel.item=+v;
+  else if(a==="back"){S.step--;if(S.step===9){S.sales.pop();save()}}
+  else if(a==="color")S.sel.color=v;
+  else if(a==="size")S.sel.size=v;
+  else if(a==="paid"){S.sales.push({p:shop().prices[S.sel.item]});S.step++;save()}
+  else if(a==="again"){S.step=0;S.sel={};window.scrollTo({top: 0,behavior: "smooth"});}
+  else if(a==="cycle"){SH.size=SZ[(SZ.indexOf(SH.size)+1)%3];S={step:0,sel:{},sales:S.sales};save()}
+  else if(a==="change"){SH=makeShop();S={step:0,sel:{},sales:[]};save();window.scrollTo({top: 0,behavior: "smooth"});}
+  R();
+});
+R();
+</script>
+</body>
+</html>
